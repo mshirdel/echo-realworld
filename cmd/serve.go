@@ -1,9 +1,12 @@
 package cmd
 
 import (
-	"fmt"
-	
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 	"github.com/spf13/cobra"
+
+	"github.com/mshirdel/echo-realworld/internal/config"
 )
 
 // serveCmd represents the serve command
@@ -20,5 +23,9 @@ to quickly create a Cobra application.`,
 }
 
 func serve(_ *cobra.Command, _ []string) {
-	fmt.Println("Start application")
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+	e.Logger.Fatal(e.Start(config.C.HTTPServer.Address))
 }
