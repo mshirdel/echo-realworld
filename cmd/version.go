@@ -5,8 +5,6 @@ import (
 	"runtime"
 
 	"github.com/spf13/cobra"
-
-	"github.com/mshirdel/echo-realworld/internal/config"
 )
 
 // versionCmd represents the version command
@@ -24,5 +22,4 @@ to quickly create a Cobra application.`,
 
 func versionFunc(_ *cobra.Command, _ []string) {
 	fmt.Println(runtime.Compiler, runtime.Version(), runtime.GOOS, runtime.GOARCH)
-	fmt.Println(config.C.Application)
 }

@@ -1,6 +1,6 @@
 module github.com/mshirdel/echo-realworld
 
-go 1.21.0
+go 1.22.0
 
 require (
 	github.com/labstack/echo/v4 v4.11.1
@@ -18,6 +18,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
+	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
