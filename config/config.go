@@ -3,18 +3,21 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gorm.io/gorm/logger"
 )
 
 type Config struct {
 	Application string     `mapstructure:"application"`
 	HTTPServer  HTTPServer `mapstructure:"http_server"`
 	Logging     Logging    `mapstructure:"logging"`
+	Database    Database   `mapstructure:"database"`
 }
 
 type HTTPServer struct {
@@ -26,6 +29,55 @@ type HTTPServer struct {
 
 type Logging struct {
 	Level string `mapstructure:"level"`
+}
+
+type Database struct {
+	Host              string        `mapstructure:"host"`
+	Port              int           `mapstructure:"port"`
+	User              string        `mapstructure:"user"`
+	Password          string        `mapstructure:"password"`
+	DBName            string        `mapstructure:"dbname"`
+	Charset           string        `mapstructure:"charset"`
+	Collation         string        `mapstructure:"collation"`
+	ParseTime         bool          `mapstructure:"parse_time"`
+	Location          string        `mapstructure:"location"`
+	MaxLifeTime       time.Duration `mapstructure:"max_life_time"`
+	MaxIdleTime       time.Duration `mapstructure:"max_idel_time"`
+	MaxOpenConnection int           `mapstructure:"max_open_connection"`
+	MaxIdleConnection int           `mapstructure:"max_idel_connection"`
+	Logger            Logger        `mapstructure:"logger"`
+}
+
+func (d *Database) DSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=%t&charset=%s&collation=%s&loc=%s&multiStatements=true",
+		d.User, d.Password, d.Host, d.Port, d.DBName, d.ParseTime, d.Charset, d.Collation, url.PathEscape(d.Location))
+}
+
+func (d *Database) MigrationDSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=%t&charset=%s&collation=%s&loc=%s&multiStatements=true",
+		d.User, d.Password, d.Host, d.Port, "", d.ParseTime, d.Charset, d.Collation, url.PathEscape(d.Location))
+}
+
+type Logger struct {
+	SlowThreshold             time.Duration `mapstructure:"slow_threshold"`
+	Level                     string        `mapstructure:"level"`
+	Colorfule                 bool          `mapstructure:"colorfule"`
+	IgnoreRecordNotFoundError bool          `mapstructure:"ignore_record_not_found_error"`
+}
+
+func (l Logger) GormLogLevel() logger.LogLevel {
+	switch l.Level {
+	case "silent":
+		return logger.Silent
+	case "error":
+		return logger.Error
+	case "warn", "warning":
+		return logger.Warn
+	case "info":
+		return logger.Info
+	default:
+		return logger.Warn
+	}
 }
 
 var _defulatConfig = ""

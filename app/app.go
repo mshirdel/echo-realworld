@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/mshirdel/echo-realworld/app/db"
 	"github.com/mshirdel/echo-realworld/config"
 	"github.com/sirupsen/logrus"
 )
@@ -10,6 +11,7 @@ import (
 type Application struct {
 	configPath string
 	Cfg        *config.Config
+	DB         *db.DB
 }
 
 func New(configPath string) *Application {
@@ -19,14 +21,21 @@ func New(configPath string) *Application {
 }
 
 func (a *Application) InitAll() error {
-	err := a.initConfig()
+	if err := a.initConfig(); err != nil {
+		return fmt.Errorf("error in initializing config: %w", err)
+	}
 
-	return err
+	if err := a.initDatabase(); err != nil {
+		return fmt.Errorf("error in initializing database: %w", err)
+	}
+
+	return nil
 }
 
 func (a *Application) Shutdown() {
 	logrus.Info("shutting down application....")
 	// close things like DB, tracing and etc
+	a.DB.Close()
 }
 
 func (a *Application) initConfig() (err error) {
@@ -40,4 +49,17 @@ func (a *Application) initConfig() (err error) {
 	}
 
 	return
+}
+
+func (a *Application) initDatabase() error {
+	if a.DB != nil {
+		return nil
+	}
+
+	a.DB = db.New(a.Cfg)
+	if err := a.DB.InitDB(); err != nil {
+		return fmt.Errorf("error in initializing db: %w", err)
+	}
+
+	return nil
 }
