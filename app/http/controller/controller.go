@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/mshirdel/echo-realworld/app"
+	"github.com/mshirdel/echo-realworld/model"
 )
 
 type Controller struct {
@@ -21,6 +22,14 @@ func (c *Controller) Routes() *echo.Echo {
 	router := c.initEcho()
 	router.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "OK")
+	})
+	router.GET("/users", func(c echo.Context) error {
+		u := model.User{
+			Username: "mshirdel",
+			Email: "mshirdel@gmail.com",
+		}
+		
+		return c.JSON(http.StatusOK, u)
 	})
 
 	return router
