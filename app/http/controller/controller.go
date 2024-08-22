@@ -8,20 +8,28 @@ import (
 )
 
 type Controller struct {
-	app *app.Application
+	app  *app.Application
+	user *UserController
 }
 
 func NewController(app *app.Application) *Controller {
 	return &Controller{
-		app: app,
+		app:  app,
+		user: NewUserController(app.Svc),
 	}
 }
 
 func (c *Controller) Routes() *echo.Echo {
 	router := c.initEcho()
-	router.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "OK")
+	router.GET("/", func(ctx echo.Context) error {
+		return ctx.JSON(http.StatusOK, c.app.Cfg.Database.Logger.Level)
 	})
+
+	api := router.Group("/api")
+	{
+		api.GET("/users", c.user.GetUsers)
+		api.POST("/users", c.user.RegisterUser)
+	}
 
 	return router
 }

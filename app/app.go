@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/mshirdel/echo-realworld/app/db"
+	"github.com/mshirdel/echo-realworld/app/repo"
+	"github.com/mshirdel/echo-realworld/app/service"
 	"github.com/mshirdel/echo-realworld/config"
 	"github.com/sirupsen/logrus"
 )
@@ -11,7 +13,9 @@ import (
 type Application struct {
 	configPath string
 	Cfg        *config.Config
-	DB         *db.DB
+	Database   *db.DB
+	Repo       *repo.Repository
+	Svc        *service.Service
 }
 
 func New(configPath string) *Application {
@@ -29,13 +33,28 @@ func (a *Application) InitAll() error {
 		return fmt.Errorf("error in initializing database: %w", err)
 	}
 
+	a.initRepositories()
+	
+	if err := a.initServices(); err != nil {
+		return fmt.Errorf("error in initializing services: %w", err)
+	}
+
 	return nil
+}
+
+func (a *Application) initServices() error {
+	if a.Svc != nil {
+		return nil
+	}
+
+	a.Svc = service.New(a.Cfg, a.Repo)
+	return a.Svc.InitAll()
 }
 
 func (a *Application) Shutdown() {
 	logrus.Info("shutting down application....")
 	// close things like DB, tracing and etc
-	a.DB.Close()
+	a.Database.Close()
 }
 
 func (a *Application) initConfig() (err error) {
@@ -52,14 +71,23 @@ func (a *Application) initConfig() (err error) {
 }
 
 func (a *Application) initDatabase() error {
-	if a.DB != nil {
+	if a.Database != nil {
 		return nil
 	}
 
-	a.DB = db.New(a.Cfg)
-	if err := a.DB.InitDB(); err != nil {
+	a.Database = db.New(a.Cfg)
+	if err := a.Database.Init(); err != nil {
 		return fmt.Errorf("error in initializing db: %w", err)
 	}
 
 	return nil
+}
+
+func (a *Application) initRepositories() {
+	if a.Repo != nil {
+		return
+	}
+
+	a.Repo = repo.New(a.Cfg, a.Database)
+	a.Repo.InitAll()
 }

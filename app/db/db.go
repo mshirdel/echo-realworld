@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mshirdel/echo-realworld/config"
+	"github.com/mshirdel/echo-realworld/models"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,19 +21,20 @@ func New(cfg *config.Config) *DB {
 	return &DB{cfg: &cfg.Database}
 }
 
-func (d *DB) InitDB() error {
+func (d *DB) Init() error {
 	var err error
 	if d.Realworld != nil {
 		return err
 	}
 
-	d.Realworld, err = d.newOrCreate()
+	d.Realworld, err = d.openOrCreate()
+	d.Realworld.AutoMigrate(&models.User{})
 
 	return err
 }
 
-func (d *DB) newOrCreate() (*gorm.DB, error) {
-	db, err := d.new()
+func (d *DB) openOrCreate() (*gorm.DB, error) {
+	db, err := d.open()
 	if err == nil {
 		return db, nil
 	}
@@ -42,15 +44,15 @@ func (d *DB) newOrCreate() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = createDB(d.cfg)
+	err = d.create()
 	if err != nil {
 		return nil, err
 	}
 
-	return d.new()
+	return d.open()
 }
 
-func (d *DB) new() (*gorm.DB, error) {
+func (d *DB) open() (*gorm.DB, error) {
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                      d.cfg.DSN(),
 		DefaultStringSize:        256,
@@ -90,17 +92,17 @@ func (d *DB) new() (*gorm.DB, error) {
 	return db, nil
 }
 
-func createDB(cfg *config.Database) error {
-	db, err := gorm.Open(mysql.Open(cfg.MigrationDSN()), &gorm.Config{})
+func (d *DB) create() error {
+	db, err := gorm.Open(mysql.Open(d.cfg.MigrationDSN()), &gorm.Config{})
 	if err != nil {
-		return fmt.Errorf("can't connect to database: [%s] - %w", cfg.MigrationDSN(), err)
+		return fmt.Errorf("can't connect to database: [%s] - %w", d.cfg.MigrationDSN(), err)
 	}
 
 	defer close(db)
 
-	logrus.Warnf("database doesnot exist, creating it ... %s", cfg.MigrationDSN())
+	logrus.Warnf("database doesnot exist, creating it ... %s", d.cfg.MigrationDSN())
 
-	stmt := fmt.Sprintf("CREATE TABLE `%s` CHARACTER SET %s COLLATE %s;", cfg.DBName, cfg.Charset, cfg.Collation)
+	stmt := fmt.Sprintf("CREATE TABLE `%s` CHARACTER SET %s COLLATE %s;", d.cfg.DBName, d.cfg.Charset, d.cfg.Collation)
 	if err = db.Exec(stmt).Error; err != nil {
 		return fmt.Errorf("can't create database: %w", err)
 	}
