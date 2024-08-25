@@ -9,6 +9,15 @@ import (
 	"github.com/mshirdel/echo-realworld/models"
 )
 
+type LoginUserRequest struct {
+	User UserLogin `json:"user"`
+}
+
+type UserLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type RegisterUserRequest struct {
 	User User `json:"user"`
 }
@@ -49,11 +58,13 @@ func (c *UserController) GetUsers(ctx echo.Context) error {
 func (c *UserController) RegisterUser(ctx echo.Context) error {
 	var req RegisterUserRequest
 	if err := ctx.Bind(&req); err != nil {
-		return ctx.JSON(http.StatusBadRequest, err.Error())
+		return ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Errors: dto.ErrorBody{Body: []string{err.Error()}},
+		})
 	}
 
 	user := models.User{
-		Uesrname: req.User.Username,
+		Username: req.User.Username,
 		Email:    req.User.Email,
 		Password: req.User.Password,
 	}
@@ -65,7 +76,28 @@ func (c *UserController) RegisterUser(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusCreated, UserResponse{
-		Email: user.Email,
-		Username: user.Uesrname,
+		Email:    user.Email,
+		Username: user.Username,
+	})
+}
+
+func (c *UserController) Login(ctx echo.Context) error {
+	var req LoginUserRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusUnprocessableEntity, dto.ErrorResponse{
+			Errors: dto.ErrorBody{Body: []string{err.Error()}},
+		})
+	}
+
+	user, err := c.svc.User.LoginUser(ctx.Request().Context(), req.User.Email, req.User.Password)
+	if err != nil {
+		return ctx.JSON(http.StatusUnprocessableEntity, dto.ErrorResponse{
+			Errors: dto.ErrorBody{Body: []string{err.Error()}},
+		})
+	}
+
+	return ctx.JSON(http.StatusCreated, UserResponse{
+		Email:    user.Email,
+		Username: user.Username,
 	})
 }

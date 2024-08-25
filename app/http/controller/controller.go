@@ -29,6 +29,7 @@ func (c *Controller) Routes() *echo.Echo {
 	{
 		api.GET("/users", c.user.GetUsers)
 		api.POST("/users", c.user.RegisterUser)
+		api.POST("/users/login", c.user.Login)
 	}
 
 	return router
