@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/mshirdel/echo-realworld/app"
+	"github.com/mshirdel/echo-realworld/app/http/middleware"
 )
 
 type Controller struct {
@@ -27,7 +28,7 @@ func (c *Controller) Routes() *echo.Echo {
 
 	api := router.Group("/api")
 	{
-		api.GET("/users", c.user.GetUsers)
+		api.GET("/user", c.user.GetUsers, middleware.AuthenticateUser())
 		api.POST("/users", c.user.RegisterUser)
 		api.POST("/users/login", c.user.Login)
 	}
@@ -38,6 +39,7 @@ func (c *Controller) Routes() *echo.Echo {
 func (c *Controller) initEcho() *echo.Echo {
 	e := echo.New()
 	e.Debug = c.app.Cfg.Logging.Level == "debug"
+	// e.Use(middleware.Logger())
 
 	return e
 }

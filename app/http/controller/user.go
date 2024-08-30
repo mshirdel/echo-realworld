@@ -75,7 +75,7 @@ func (c *UserController) RegisterUser(ctx echo.Context) error {
 		})
 	}
 
-	token, err := service.CreateToken(user.Username)
+	token, err := service.CreateToken(user.Username, user.ID)
 	if err != nil {
 		return ctx.JSON(http.StatusUnprocessableEntity, dto.ErrorResponse{
 			Errors: dto.ErrorBody{Body: []string{err.Error()}},
@@ -104,8 +104,16 @@ func (c *UserController) Login(ctx echo.Context) error {
 		})
 	}
 
+	token, err := service.CreateToken(user.Username, user.ID)
+	if err != nil {
+		return ctx.JSON(http.StatusUnprocessableEntity, dto.ErrorResponse{
+			Errors: dto.ErrorBody{Body: []string{err.Error()}},
+		})
+	}
+
 	return ctx.JSON(http.StatusCreated, UserResponse{
 		Email:    user.Email,
 		Username: user.Username,
+		Token:    token,
 	})
 }
