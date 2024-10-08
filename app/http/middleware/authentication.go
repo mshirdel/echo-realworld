@@ -8,15 +8,17 @@ import (
 	"github.com/mshirdel/echo-realworld/app/service"
 )
 
+const _authHeader = "Authorization"
+
 func AuthenticateUser() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			auth , ok := c.Request().Header["Authorization"]
-			if !ok {
+			auth := c.Request().Header.Get(_authHeader)
+			if len(auth) == 0 {
 				return c.JSON(http.StatusUnauthorized, nil)
 			}
 
-			parts := strings.Split(auth[0], " ")
+			parts := strings.Split(auth, " ")
 			if len(parts) < 2 {
 				return c.JSON(http.StatusUnauthorized, nil)
 			}

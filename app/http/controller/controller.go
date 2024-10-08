@@ -23,7 +23,7 @@ func NewController(app *app.Application) *Controller {
 func (c *Controller) Routes() *echo.Echo {
 	router := c.initEcho()
 	router.GET("/", func(ctx echo.Context) error {
-		return ctx.JSON(http.StatusOK, c.app.Cfg.Database.Logger.Level)
+		return ctx.JSON(http.StatusOK, c.app.Cfg.Application)
 	})
 
 	api := router.Group("/api")
