@@ -80,7 +80,6 @@ func (l Logger) GormLogLevel() logger.LogLevel {
 	}
 }
 
-var _defulatConfig = ""
 var prifix = "realworld"
 
 func Init(cfgFile string) (*Config, error) {
