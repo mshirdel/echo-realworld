@@ -46,7 +46,7 @@ func NewUserController(s *service.Service) *UserController {
 	}
 }
 
-func (c *UserController) GetUsers(ctx echo.Context) error {
+func (c *UserController) GetCurrentUser(ctx echo.Context) error {
 	// users := &[]models.User{}
 	// if err := c.repo.Find(ctx.Request().Context(), users); err != nil {
 	// 	return ctx.JSON(http.StatusBadRequest, err.Error())

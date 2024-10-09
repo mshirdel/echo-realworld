@@ -28,7 +28,7 @@ func (c *Controller) Routes() *echo.Echo {
 
 	api := router.Group("/api")
 	{
-		api.GET("/user", c.user.GetUsers, middleware.AuthenticateUser())
+		api.GET("/user", c.user.GetCurrentUser, middleware.AuthenticateUser())
 		api.POST("/users", c.user.RegisterUser)
 		api.POST("/users/login", c.user.Login)
 	}
