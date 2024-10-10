@@ -27,13 +27,14 @@ func AuthenticateUser() echo.MiddlewareFunc {
 				return c.JSON(http.StatusUnauthorized, nil)
 			}
 
-			userInfo, err := service.VerifyToken(parts[1])
+			userID, err := service.VerifyToken(parts[1])
 			if err != nil {
 				return c.JSON(http.StatusUnauthorized, nil)
 			}
 
-			c.Set("username", userInfo.Username)
-			c.Set("user_id", userInfo.UserID)
+			if userID != nil {
+				c.Set("user_id", userID)
+			}
 
 			return next(c)
 		}

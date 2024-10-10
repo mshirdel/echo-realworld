@@ -25,6 +25,6 @@ database:
   max_idel_connection: 5
   logger:
     slow_threshold: 200ms
-    level: "info"
+    level: "error"
     colorfule: true
     ignore_record_not_found_error: false`

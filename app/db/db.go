@@ -68,12 +68,12 @@ func (d *DB) open() (*gorm.DB, error) {
 		}),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("can't connect to database [%s] - %w", d.cfg.DSN(), err)
+		return nil, fmt.Errorf("connect to database [%s] - %w", d.cfg.DSN(), err)
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, fmt.Errorf("can't get sql database [%s] - %w", d.cfg.DSN(), err)
+		return nil, fmt.Errorf("get sql database [%s] - %w", d.cfg.DSN(), err)
 	}
 
 	sqlDB.SetMaxOpenConns(d.cfg.MaxOpenConnection)
@@ -84,7 +84,7 @@ func (d *DB) open() (*gorm.DB, error) {
 	var connectionID int
 	tx := db.Raw("SELECT CONNECTION_ID()").Scan(&connectionID)
 	if tx.Error != nil || tx.RowsAffected == 0 {
-		return nil, fmt.Errorf("can't ping database[%s] - %w", d.cfg.DSN(), err)
+		return nil, fmt.Errorf("ping database[%s] - %w", d.cfg.DSN(), err)
 	}
 
 	logrus.Debugf("[PING] connected to MySQL database with connection id: %d", connectionID)

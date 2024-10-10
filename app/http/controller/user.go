@@ -47,12 +47,19 @@ func NewUserController(s *service.Service) *UserController {
 }
 
 func (c *UserController) GetCurrentUser(ctx echo.Context) error {
-	// users := &[]models.User{}
-	// if err := c.repo.Find(ctx.Request().Context(), users); err != nil {
-	// 	return ctx.JSON(http.StatusBadRequest, err.Error())
-	// }
+	userID := ctx.Get("user_id").(*uint)
+	user, err := c.svc.User.UserInfo(ctx.Request().Context(), *userID)
+	if err != nil {
+		return err
+	}
 
-	return ctx.JSON(http.StatusOK, "users")
+	return ctx.JSON(http.StatusOK, UserResponse{
+		Email:    user.Email,
+		Token:    "todo",
+		Username: user.Username,
+		Bio:      "todo",
+		Image:    "todo",
+	})
 }
 
 func (c *UserController) RegisterUser(ctx echo.Context) error {
@@ -68,14 +75,14 @@ func (c *UserController) RegisterUser(ctx echo.Context) error {
 		Email:    req.User.Email,
 		Password: req.User.Password,
 	}
-	err := c.svc.User.RegisterUser(ctx.Request().Context(), user)
+	userID, err := c.svc.User.RegisterUser(ctx.Request().Context(), user)
 	if err != nil {
 		return ctx.JSON(http.StatusUnprocessableEntity, dto.ErrorResponse{
 			Errors: dto.ErrorBody{Body: []string{err.Error()}},
 		})
 	}
 
-	token, err := service.CreateToken(user.Username, user.ID)
+	token, err := service.CreateToken(userID)
 	if err != nil {
 		return ctx.JSON(http.StatusUnprocessableEntity, dto.ErrorResponse{
 			Errors: dto.ErrorBody{Body: []string{err.Error()}},
@@ -104,7 +111,7 @@ func (c *UserController) Login(ctx echo.Context) error {
 		})
 	}
 
-	token, err := service.CreateToken(user.Username, user.ID)
+	token, err := service.CreateToken(user.ID)
 	if err != nil {
 		return ctx.JSON(http.StatusUnprocessableEntity, dto.ErrorResponse{
 			Errors: dto.ErrorBody{Body: []string{err.Error()}},

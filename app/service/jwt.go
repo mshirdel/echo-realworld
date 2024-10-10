@@ -9,18 +9,10 @@ import (
 
 var secretKey = []byte("secret-key")
 
-type UserInfo struct {
-	Username string
-	UserID   uint
-	ExpDate  int64
-	jwt.Claims
-}
-
-func CreateToken(username string, id uint) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserInfo{
-		Username: username,
-		UserID:   id,
-		ExpDate:  time.Now().Add(time.Hour * 72).Unix(),
+func CreateToken(id uint) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"UserID":  id,
+		"ExpDate": time.Now().Add(time.Hour * 72).Unix(),
 	})
 
 	tokenString, err := token.SignedString(secretKey)
@@ -31,7 +23,7 @@ func CreateToken(username string, id uint) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) (*UserInfo, error) {
+func VerifyToken(tokenString string) (*uint, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
@@ -43,8 +35,9 @@ func VerifyToken(tokenString string) (*UserInfo, error) {
 		return nil, fmt.Errorf("invalid token")
 	}
 
-	if claims, ok := token.Claims.(UserInfo); ok {
-		return &claims, nil
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		userID := uint(claims["UserID"].(float64))
+		return &userID, nil
 	}
 
 	return nil, nil

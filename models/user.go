@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,12 +16,4 @@ type User struct {
 	CreatedAt time.Time      `gorm:"column:created_at;type:TIMESTAMP;not null"`
 	UpdatedAt time.Time      `gorm:"column:updated_at;type:TIMESTAMP;not null"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
-}
-
-func (u *User) Run() error {
-	if u.ID == 0 {
-		return fmt.Errorf("id is zero error: id: [%d]", u.ID)
-	}
-
-	return nil
 }

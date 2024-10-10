@@ -20,21 +20,21 @@ func NewUserService(r *repo.Repository) *UserService {
 	}
 }
 
-func (u *UserService) RegisterUser(ctx context.Context, user models.User) error {
+func (u *UserService) RegisterUser(ctx context.Context, user models.User) (uint, error) {
 	pass, err := makePassword(user.Password)
 	if err != nil {
-		return fmt.Errorf("error in encrypting password: %w", err)
+		return 0, fmt.Errorf("error in encrypting password: %w", err)
 	}
 
 	user.Password = pass
 
-	err = u.repo.User.Create(ctx, user)
+	user, err = u.repo.User.Create(ctx, user)
 	// todo log error
 	if err != nil {
-		return fmt.Errorf("error in creating user")
+		return 0, fmt.Errorf("error in creating user: %w", err)
 	}
 
-	return nil
+	return user.ID, nil
 }
 
 func (u *UserService) LoginUser(ctx context.Context, username string, password string) (models.User, error) {
@@ -42,20 +42,24 @@ func (u *UserService) LoginUser(ctx context.Context, username string, password s
 	if err != nil {
 		return models.User{}, fmt.Errorf("you are not authorized")
 	}
-	
+
 	err = checkPassword(password, user.Password)
 	if err != nil {
 		return models.User{}, fmt.Errorf("you are not authorized")
 	}
-	
+
 	user.LastLogin = time.Now()
 	err = u.repo.User.Update(ctx, user)
 	if err != nil {
 		// and log this
 		return models.User{}, fmt.Errorf("you are not authorized")
 	}
-	
+
 	return user, nil
+}
+
+func (u *UserService) UserInfo(ctx context.Context, id uint) (models.User, error) {
+	return u.repo.User.FindByID(ctx, id)
 }
 
 func makePassword(password string) (string, error) {
