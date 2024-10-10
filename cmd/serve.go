@@ -19,7 +19,7 @@ var serveCmd = &cobra.Command{
 }
 
 func serve(_ *cobra.Command, _ []string) error {
-	app := app.New(cfgFile)
+	app := app.New(_cfgFile)
 	err := app.InitAll()
 	if err != nil {
 		return err

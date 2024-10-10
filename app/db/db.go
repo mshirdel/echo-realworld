@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/mshirdel/echo-realworld/config"
-	"github.com/mshirdel/echo-realworld/models"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -28,7 +27,6 @@ func (d *DB) Init() error {
 	}
 
 	d.Realworld, err = d.openOrCreate()
-	d.Realworld.AutoMigrate(&models.User{})
 
 	return err
 }

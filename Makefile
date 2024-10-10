@@ -16,3 +16,14 @@ build-static-vendor-linux: vendor
 
 vendor: set-goproxy
 	go mod vendor -v
+
+new-migration:
+	@if [ -z "$(FILENAME)" ]; then \
+		echo "Usage: make new-migration FILENAME=<your_filename>"; \
+		exit 1; \
+	fi; \
+	TIMESTAMP=$$(date +"%s"); \
+	NEW_FILENAME=$$(printf "%s_%s%s" $$TIMESTAMP $$FILENAME ".up.sql"); \
+	touch "migrations/$$NEW_FILENAME"; \
+	NEW_FILENAME=$$(printf "%s_%s%s" $$TIMESTAMP $$FILENAME ".down.sql"); \
+    touch "migrations/$$NEW_FILENAME"; \

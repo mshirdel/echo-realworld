@@ -25,16 +25,16 @@ func New(configPath string) *Application {
 }
 
 func (a *Application) InitAll() error {
-	if err := a.initConfig(); err != nil {
+	if err := a.InitConfig(); err != nil {
 		return fmt.Errorf("error in initializing config: %w", err)
 	}
 
-	if err := a.initDatabase(); err != nil {
+	if err := a.InitDatabase(); err != nil {
 		return fmt.Errorf("error in initializing database: %w", err)
 	}
 
 	a.initRepositories()
-	
+
 	if err := a.initServices(); err != nil {
 		return fmt.Errorf("error in initializing services: %w", err)
 	}
@@ -57,7 +57,7 @@ func (a *Application) Shutdown() {
 	a.Database.Close()
 }
 
-func (a *Application) initConfig() (err error) {
+func (a *Application) InitConfig() (err error) {
 	if a.Cfg != nil {
 		return nil
 	}
@@ -70,7 +70,7 @@ func (a *Application) initConfig() (err error) {
 	return
 }
 
-func (a *Application) initDatabase() error {
+func (a *Application) InitDatabase() error {
 	if a.Database != nil {
 		return nil
 	}
